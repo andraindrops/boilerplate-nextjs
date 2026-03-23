@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Notification {
+  id             String    @id @default(cuid())
+  type           String
+  recipientEmail String
+  recipientName  String
+  subject        String
+  body           String
+  attachmentKeys Json      @default("[]")
+  idempotencyKey String    @unique
+  status         String    @default("pending")
+  attemptCount   Int       @default(0)
+  maxAttempts    Int       @default(5)
+  nextRetryAt    DateTime  @default(now())
+  lastError      String?
+  sentAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  teamId    String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspaceUsers WorkspaceUser[]
+  examples       Example[]
+}
+
+model WorkspaceUser {
+  id          String   @id @default(uuid())
+  teamId      String
+  workspaceId String
+  userId      String
+  role        String   @default("member")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model Example {
+  id               String   @id @default(uuid())
+  teamId           String
+  workspaceId      String
+  userId           String
+  name             String
+  externalImageKey String?
+  internalImageKey String?
+  createdUserId    String
+  updatedUserId    String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}

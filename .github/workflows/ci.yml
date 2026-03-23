@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: boilerplate-nextjs-test
+        ports: ["5432:5432"]
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/boilerplate-nextjs-test
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      CRON_SECRET: ci-test-cron-secret
+      EMAIL_FROM: noreply@example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm exec prisma migrate deploy
+      - run: pnpm build
+      - run: pnpm lint
+      - run: pnpm test
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: ci
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm exec prisma migrate deploy
+      - run: curl -X POST "$VERCEL_DEPLOY_HOOK_URL"

@@ -1,0 +1,42 @@
+{
+  "name": "sekonare",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/robbert229/devcontainer-features/postgresql:1": {}
+  },
+  "forwardPorts": [3000, 5432],
+  "portsAttributes": {
+    "3000": {
+      "label": "3000",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "5432",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "npm install && npx prisma generate && npx prisma migrate deploy && npx prisma db seed",
+  "postStartCommand": "pg_isready -U postgres || sudo pg_ctlcluster 17 main start",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "biomejs.biome",
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss",
+        "ms-playwright.playwright"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "quickfix.biome": "explicit",
+          "source.organizeImports.biome": "explicit"
+        }
+      }
+    }
+  },
+  "remoteEnv": {
+    "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/boilerplate-nextjs-work"
+  }
+}

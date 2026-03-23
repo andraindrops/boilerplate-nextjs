@@ -1,0 +1,94 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!node_modules",
+      "!.next*",
+      "!dist",
+      "!build",
+      "!src/generated",
+      "!src/components/ui",
+      "!playwright",
+      "!playwright-report"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "fix": "safe",
+          "options": {
+            "attributes": ["class", "className"],
+            "functions": ["clsx", "cn", "cva"]
+          }
+        }
+      }
+    },
+    "domains": {
+      "next": "recommended",
+      "react": "recommended"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+              "@/generated/**",
+              ":BLANK_LINE:",
+              "@/lib/**",
+              ":BLANK_LINE:",
+              "@/schemas/**",
+              ":BLANK_LINE:",
+              "@/policies/**",
+              ":BLANK_LINE:",
+              "@/services/shared/**",
+              ":BLANK_LINE:",
+              "@/services/domain/**",
+              ":BLANK_LINE:",
+              "@/actions/**",
+              ":BLANK_LINE:",
+              "@/components/ui/**",
+              ":BLANK_LINE:",
+              "@/components/domain/**",
+              ":BLANK_LINE:",
+              "@/tests/_helpers/**",
+              ":BLANK_LINE:",
+              "@/tests/_fixtures/**",
+              ":BLANK_LINE:",
+              "@/tests/**"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
