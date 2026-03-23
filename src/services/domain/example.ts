@@ -77,7 +77,7 @@ export async function update({
   userId: string;
   data: exampleSchema.updateSchema;
 }) {
-  await examplePolicy.assertAccessible({ teamId, workspaceId, userId, id });
+  await examplePolicy.assertUpdatable({ teamId, workspaceId, userId, id });
 
   const example = await db.$transaction(async (tx) => {
     const example = await tx.example.update({
@@ -124,7 +124,7 @@ export async function remove({
   workspaceId: string;
   userId: string;
 }) {
-  await examplePolicy.assertAccessible({ teamId, workspaceId, userId, id });
+  await examplePolicy.assertRemovable({ teamId, workspaceId, userId, id });
 
   const example = await db.example.delete({
     where: { teamId, workspaceId, id, userId },

@@ -22,7 +22,7 @@ describe("examplePolicy", () => {
     workspace2 = await createTestWorkspace({ teamId: team1Id });
   });
 
-  describe("assertAccessible", () => {
+  describe("assertUpdatable", () => {
     it("throws error when example belongs to different workspace", async () => {
       const example = await createTestExample({
         teamId: team1Id,
@@ -30,7 +30,25 @@ describe("examplePolicy", () => {
       });
 
       await expect(
-        examplePolicy.assertAccessible({
+        examplePolicy.assertUpdatable({
+          userId: example.userId,
+          teamId: team1Id,
+          workspaceId: workspace2.id,
+          id: example.id,
+        }),
+      ).rejects.toThrow(AccessDeniedError);
+    });
+  });
+
+  describe("assertRemovable", () => {
+    it("throws error when example belongs to different workspace", async () => {
+      const example = await createTestExample({
+        teamId: team1Id,
+        workspaceId: workspace1.id,
+      });
+
+      await expect(
+        examplePolicy.assertRemovable({
           userId: example.userId,
           teamId: team1Id,
           workspaceId: workspace2.id,
