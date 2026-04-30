@@ -37,6 +37,6 @@
     }
   },
   "remoteEnv": {
-    "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/boilerplate-nextjs-work"
+    "DATABASE_URL": "postgresql://postgres:postgres@localhost:5432/coputo-workspace"
   }
 }

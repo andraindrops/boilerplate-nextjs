@@ -2,7 +2,7 @@ import { beforeAll } from "vitest";
 
 import { cleanupDatabase } from "@/tests/_helpers/cleanup";
 
-const TEST_DATABASE_NAME = "boilerplate-nextjs-test";
+const TEST_DATABASE_NAME = "coputo-test";
 
 function validateTestDatabase() {
   if (!process.env.DATABASE_URL?.includes(TEST_DATABASE_NAME)) {

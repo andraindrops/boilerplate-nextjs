@@ -30,8 +30,7 @@ export default defineConfig({
     command: "npm run dev",
     url: "http://localhost:3000",
     env: {
-      DATABASE_URL:
-        "postgresql://postgres:postgres@localhost:5432/boilerplate-nextjs-test",
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/coputo-test",
     },
   },
 });
