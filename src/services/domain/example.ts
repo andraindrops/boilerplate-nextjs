@@ -24,13 +24,13 @@ export async function findMany({
 }
 
 export async function findById({
-  id,
   teamId,
   workspaceId,
+  id,
 }: {
-  id: string;
   teamId: string;
   workspaceId: string;
+  id: string;
 }) {
   const example = await db.example.findUniqueOrThrow({
     where: { teamId, workspaceId, id },
@@ -52,12 +52,12 @@ export async function create({
 }) {
   const example = await db.example.create({
     data: {
-      ...data,
       teamId,
       workspaceId,
       userId,
       createdUserId: userId,
       updatedUserId: userId,
+      ...data,
     },
   });
 
@@ -65,24 +65,24 @@ export async function create({
 }
 
 export async function update({
-  id,
   teamId,
   workspaceId,
   userId,
+  id,
   data,
 }: {
-  id: string;
   teamId: string;
   workspaceId: string;
   userId: string;
+  id: string;
   data: exampleSchema.updateSchema;
 }) {
   await examplePolicy.assertUpdatable({ teamId, workspaceId, userId, id });
 
   const example = await db.$transaction(async (tx) => {
     const example = await tx.example.update({
-      where: { teamId, workspaceId, id, userId },
-      data: { ...data, updatedUserId: userId },
+      where: { teamId, workspaceId, userId, id },
+      data: { updatedUserId: userId, ...data },
     });
 
     await notificationService.create({
@@ -114,20 +114,20 @@ export async function update({
 }
 
 export async function remove({
-  id,
   teamId,
   workspaceId,
   userId,
+  id,
 }: {
-  id: string;
   teamId: string;
   workspaceId: string;
   userId: string;
+  id: string;
 }) {
   await examplePolicy.assertRemovable({ teamId, workspaceId, userId, id });
 
   const example = await db.example.delete({
-    where: { teamId, workspaceId, id, userId },
+    where: { teamId, workspaceId, userId, id },
   });
 
   return fromDb({ data: example });

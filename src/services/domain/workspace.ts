@@ -1,14 +1,14 @@
 import db from "@/lib/db";
 
 export async function findMany({
-  userId,
   teamId,
+  userId,
 }: {
-  userId: string;
   teamId: string;
+  userId: string;
 }) {
   const workspaceUsers = await db.workspaceUser.findMany({
-    where: { userId, teamId },
+    where: { teamId, userId },
     include: { workspace: true },
     orderBy: { createdAt: "asc" },
   });

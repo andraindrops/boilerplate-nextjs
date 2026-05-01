@@ -1,6 +1,7 @@
 import db from "@/lib/db";
 
 export async function cleanupDatabase() {
+  await db.task.deleteMany({});
   await db.example.deleteMany({});
   await db.notification.deleteMany({});
   await db.workspaceUser.deleteMany({});

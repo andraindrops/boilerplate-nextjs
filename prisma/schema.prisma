@@ -43,6 +43,7 @@ model Workspace {
 
   workspaceUsers WorkspaceUser[]
   examples       Example[]
+  tasks          Task[]
 }
 
 model WorkspaceUser {
@@ -69,6 +70,21 @@ model Example {
   updatedUserId    String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model Task {
+  id            String   @id @default(uuid())
+  teamId        String
+  workspaceId   String
+  userId        String
+  name          String
+  content       String
+  createdUserId String
+  updatedUserId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
 }

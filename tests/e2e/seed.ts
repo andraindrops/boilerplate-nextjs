@@ -2,6 +2,7 @@ import db from "@/lib/db";
 
 import { cleanupDatabase } from "@/tests/_helpers/cleanup";
 import { createTestExample } from "@/tests/_helpers/fixtures/example";
+import { createTestTask } from "@/tests/_helpers/fixtures/task";
 import { createTestWorkspace } from "@/tests/_helpers/fixtures/workspace";
 import { createTestWorkspaceUser } from "@/tests/_helpers/fixtures/workspaceUser";
 
@@ -18,7 +19,7 @@ export async function main() {
   await cleanupDatabase();
 
   const workspace = await createTestWorkspace(
-    { id: teamId, teamId, userId },
+    { teamId, userId, id: teamId },
     { name: "Test Workspace" },
   );
 
@@ -30,6 +31,10 @@ export async function main() {
   await createTestExample(
     { teamId, workspaceId: workspace.id, userId },
     { name: "Test Example" },
+  );
+  await createTestTask(
+    { teamId, workspaceId: workspace.id, userId },
+    { name: "Test Task", content: "Test Task Content" },
   );
 }
 

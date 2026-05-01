@@ -6,8 +6,8 @@ export async function createTestWorkspace(
 ) {
   const workspace = await db.workspace.create({
     data: {
-      id: context.id ?? crypto.randomUUID(),
       teamId: context.teamId ?? crypto.randomUUID(),
+      id: context.id ?? crypto.randomUUID(),
       name: data.name ?? "Test Workspace",
     },
   });

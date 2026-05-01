@@ -10,12 +10,12 @@ test.describe("example", () => {
     const createButton = page.getByTestId("example-create-button");
     await createButton.click();
 
-    await page.waitForTimeout(500);
+    const exampleItems = page.getByTestId("example-list-item");
+    await expect(exampleItems).toHaveCount(2);
 
-    await expect(page.getByText("Untitled")).toBeVisible();
-
-    const exampleLink = page.getByText("Untitled").first();
-    await exampleLink.click();
+    const createdExampleLink = exampleItems.first().getByRole("link");
+    await expect(createdExampleLink).toBeVisible();
+    await createdExampleLink.click();
 
     await expect(page).toHaveURL(/.*\/workspaces\/.+\/examples\/.+/);
 
@@ -25,8 +25,6 @@ test.describe("example", () => {
 
     const submitButton = page.getByTestId("example-submit-button");
     await submitButton.click();
-
-    await page.waitForTimeout(500);
 
     await expect(nameInput).toHaveValue("Updated Test Example");
 

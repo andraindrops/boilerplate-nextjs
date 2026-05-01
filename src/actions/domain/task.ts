@@ -2,50 +2,46 @@
 
 import { revalidatePath } from "next/cache";
 
-import type * as exampleSchema from "@/schemas/domain/example";
+import type * as taskSchema from "@/schemas/domain/task";
 
 import * as authService from "@/services/shared/auth";
 
-import * as exampleService from "@/services/domain/example";
+import * as taskService from "@/services/domain/task";
 
 export async function findMany() {
   const teamId = await authService.getTeamId();
   const workspaceId = await authService.getWorkspaceId();
 
-  const result = await exampleService.findMany({
+  return await taskService.findMany({
     teamId,
     workspaceId,
   });
-
-  return result;
 }
 
 export async function findById({ id }: { id: string }) {
   const teamId = await authService.getTeamId();
   const workspaceId = await authService.getWorkspaceId();
 
-  const result = await exampleService.findById({
+  return await taskService.findById({
     teamId,
     workspaceId,
     id,
   });
-
-  return result;
 }
 
-export async function create({ data }: { data: exampleSchema.createSchema }) {
+export async function create({ data }: { data: taskSchema.createSchema }) {
   const teamId = await authService.getTeamId();
   const workspaceId = await authService.getWorkspaceId();
   const userId = await authService.getUserId();
 
-  const result = await exampleService.create({
+  const result = await taskService.create({
     teamId,
     workspaceId,
     userId,
     data,
   });
 
-  revalidatePath(`/workspaces/${workspaceId}/examples`);
+  revalidatePath(`/workspaces/${workspaceId}/tasks`);
 
   return result;
 }
@@ -55,13 +51,13 @@ export async function update({
   data,
 }: {
   id: string;
-  data: exampleSchema.updateSchema;
+  data: taskSchema.updateSchema;
 }) {
   const teamId = await authService.getTeamId();
   const workspaceId = await authService.getWorkspaceId();
   const userId = await authService.getUserId();
 
-  const result = await exampleService.update({
+  const result = await taskService.update({
     teamId,
     workspaceId,
     userId,
@@ -69,8 +65,8 @@ export async function update({
     data,
   });
 
-  revalidatePath(`/workspaces/${workspaceId}/examples`);
-  revalidatePath(`/workspaces/${workspaceId}/examples/${id}`);
+  revalidatePath(`/workspaces/${workspaceId}/tasks`);
+  revalidatePath(`/workspaces/${workspaceId}/tasks/${id}`);
 
   return result;
 }
@@ -80,14 +76,14 @@ export async function remove({ id }: { id: string }) {
   const workspaceId = await authService.getWorkspaceId();
   const userId = await authService.getUserId();
 
-  const result = await exampleService.remove({
+  const result = await taskService.remove({
     teamId,
     workspaceId,
     userId,
     id,
   });
 
-  revalidatePath(`/workspaces/${workspaceId}/examples`);
+  revalidatePath(`/workspaces/${workspaceId}/tasks`);
 
   return result;
 }

@@ -2,16 +2,16 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { AccessDeniedError } from "@/services/shared/scope";
 
-import * as exampleService from "@/services/domain/example";
+import * as taskService from "@/services/domain/task";
 
 import { cleanupDatabase } from "@/tests/_helpers/cleanup";
 import {
-  createTestExample,
+  createTestTask,
   createTestWorkspace,
   createTestWorkspaceUser,
 } from "@/tests/_helpers/fixtures/_index";
 
-describe("exampleService", () => {
+describe("taskService", () => {
   const team1Id = "team1-id";
   const team1User1Id = "team1-user1-id";
   const team1User2Id = "team1-user2-id";
@@ -45,36 +45,36 @@ describe("exampleService", () => {
   });
 
   describe("findMany", () => {
-    it("returns examples for the specified team and workspace", async () => {
-      await createTestExample(
+    it("returns tasks for the specified team and workspace", async () => {
+      await createTestTask(
         { teamId: team1Id, workspaceId: team1workspace1.id },
-        { name: "Team 1 - Workspace 1 Example 1" },
+        { name: "Team 1 - Workspace 1 Task 1", content: "Content 1" },
       );
-      await createTestExample(
+      await createTestTask(
         { teamId: team1Id, workspaceId: team1workspace1.id },
-        { name: "Team 1 - Workspace 1 Example 2" },
+        { name: "Team 1 - Workspace 1 Task 2", content: "Content 2" },
       );
-      await createTestExample(
+      await createTestTask(
         { teamId: team1Id, workspaceId: team1workspace2.id },
-        { name: "Team 1 - Workspace 2 Example 1" },
+        { name: "Team 1 - Workspace 2 Task 1", content: "Content 1" },
       );
 
-      const result = await exampleService.findMany({
+      const result = await taskService.findMany({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
       });
 
       expect(result).toHaveLength(2);
       expect(result.map((e) => e.name)).toContain(
-        "Team 1 - Workspace 1 Example 1",
+        "Team 1 - Workspace 1 Task 1",
       );
       expect(result.map((e) => e.name)).toContain(
-        "Team 1 - Workspace 1 Example 2",
+        "Team 1 - Workspace 1 Task 2",
       );
     });
 
-    it("returns empty array when no examples exist", async () => {
-      const result = await exampleService.findMany({
+    it("returns empty array when no tasks exist", async () => {
+      const result = await taskService.findMany({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
       });
@@ -82,63 +82,64 @@ describe("exampleService", () => {
       expect(result).toEqual([]);
     });
 
-    it("returns examples sorted by createdAt descending", async () => {
-      const example1 = await createTestExample(
+    it("returns tasks sorted by createdAt descending", async () => {
+      const task1 = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Team 1 - Workspace 1 Example 1" },
+        { name: "Team 1 - Workspace 1 Task 1", content: "Content 1" },
       );
 
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      const example2 = await createTestExample(
+      const task2 = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Team 1 - Workspace 1 Example 2" },
+        { name: "Team 1 - Workspace 1 Task 2", content: "Content 2" },
       );
 
-      const result = await exampleService.findMany({
+      const result = await taskService.findMany({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
       });
 
-      expect(result[0].id).toBe(example2.id);
-      expect(result[1].id).toBe(example1.id);
+      expect(result[0].id).toBe(task2.id);
+      expect(result[1].id).toBe(task1.id);
     });
   });
 
   describe("findById", () => {
-    it("returns the example when it exists", async () => {
-      const example = await createTestExample(
+    it("returns the task when it exists", async () => {
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Team 1 - Workspace 1 Example" },
+        { name: "Team 1 - Workspace 1 Task", content: "Task content" },
       );
 
-      const result = await exampleService.findById({
+      const result = await taskService.findById({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
-        id: example.id,
+        id: task.id,
       });
 
       expect(result).toMatchObject({
-        id: example.id,
-        name: "Team 1 - Workspace 1 Example",
+        id: task.id,
+        name: "Team 1 - Workspace 1 Task",
+        content: "Task content",
       });
     });
 
-    it("throws error when example does not exist", async () => {
+    it("throws error when task does not exist", async () => {
       await expect(
-        exampleService.findById({
+        taskService.findById({
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           id: "non-existent-id",
@@ -146,50 +147,51 @@ describe("exampleService", () => {
       ).rejects.toThrow();
     });
 
-    it("throws error when example belongs to different workspace", async () => {
-      const example = await createTestExample(
+    it("throws error when task belongs to different workspace", async () => {
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Team 1 - Workspace 1 Example" },
+        { name: "Team 1 - Workspace 1 Task", content: "Task content" },
       );
 
       await expect(
-        exampleService.findById({
+        taskService.findById({
           teamId: team2Id,
           workspaceId: team1workspace2.id,
-          id: example.id,
+          id: task.id,
         }),
       ).rejects.toThrow();
     });
   });
 
   describe("create", () => {
-    it("creates a new example", async () => {
-      const result = await exampleService.create({
+    it("creates a new task", async () => {
+      const result = await taskService.create({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
         userId: team1User1Id,
-        data: { name: "Test Example" },
+        data: { name: "Test Task", content: "Test Task Content" },
       });
 
       expect(result).toMatchObject({
         id: expect.any(String),
-        name: "Test Example",
+        name: "Test Task",
+        content: "Test Task Content",
       });
     });
 
-    it("creates example with correct team and workspace association", async () => {
-      const result = await exampleService.create({
+    it("creates task with correct team and workspace association", async () => {
+      const result = await taskService.create({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
         userId: team1User1Id,
-        data: { name: "Test Example" },
+        data: { name: "Test Task", content: "Test Task Content" },
       });
 
-      const found = await exampleService.findById({
+      const found = await taskService.findById({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
         id: result.id,
@@ -200,76 +202,74 @@ describe("exampleService", () => {
   });
 
   describe("update", () => {
-    it("updates an existing example", async () => {
-      const example = await createTestExample(
+    it("updates an existing task", async () => {
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Test Example" },
+        { name: "Test Task", content: "Test Task Content" },
       );
 
-      const result = await exampleService.update({
+      const result = await taskService.update({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
         userId: team1User1Id,
-        id: example.id,
+        id: task.id,
         data: {
-          name: "Updated Test Example",
-          internalImageKey: null,
-          externalImageKey: null,
+          name: "Updated Test Task",
+          content: "Updated Task Content",
         },
       });
 
-      expect(result.name).toBe("Updated Test Example");
+      expect(result.name).toBe("Updated Test Task");
+      expect(result.content).toBe("Updated Task Content");
     });
 
-    it("throws error when example belongs to different workspace", async () => {
-      const example = await createTestExample(
+    it("throws error when task belongs to different workspace", async () => {
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Test Example" },
+        { name: "Test Task", content: "Test Task Content" },
       );
 
       await expect(
-        exampleService.update({
+        taskService.update({
           teamId: team1Id,
           workspaceId: team1workspace2.id,
           userId: team1User2Id,
-          id: example.id,
+          id: task.id,
           data: {
-            name: "Updated Test Example",
-            internalImageKey: null,
-            externalImageKey: null,
+            name: "Updated Test Task",
+            content: "Updated Task Content",
           },
         }),
       ).rejects.toThrow(AccessDeniedError);
     });
 
     it("throws error when called by a different user in the same workspace", async () => {
-      const example = await createTestExample(
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Test Example" },
+        { name: "Test Task", content: "Test Task Content" },
       );
 
       await expect(
-        exampleService.update({
+        taskService.update({
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User2Id,
-          id: example.id,
+          id: task.id,
           data: {
-            name: "Updated Test Example",
-            internalImageKey: null,
-            externalImageKey: null,
+            name: "Updated Test Task",
+            content: "Updated Task Content",
           },
         }),
       ).rejects.toThrow(AccessDeniedError);
@@ -277,68 +277,68 @@ describe("exampleService", () => {
   });
 
   describe("remove", () => {
-    it("removes an existing example", async () => {
-      const example = await createTestExample(
+    it("removes an existing task", async () => {
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Test Example" },
+        { name: "Test Task", content: "Test Task Content" },
       );
 
-      await exampleService.remove({
+      await taskService.remove({
         teamId: team1Id,
         workspaceId: team1workspace1.id,
         userId: team1User1Id,
-        id: example.id,
+        id: task.id,
       });
 
       await expect(
-        exampleService.findById({
+        taskService.findById({
           teamId: team1Id,
           workspaceId: team1workspace1.id,
-          id: example.id,
+          id: task.id,
         }),
       ).rejects.toThrow();
     });
 
-    it("throws error when example belongs to different workspace", async () => {
-      const example = await createTestExample(
+    it("throws error when task belongs to different workspace", async () => {
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Test Example" },
+        { name: "Test Task", content: "Test Task Content" },
       );
 
       await expect(
-        exampleService.remove({
+        taskService.remove({
           teamId: team1Id,
           workspaceId: team1workspace2.id,
           userId: team1User2Id,
-          id: example.id,
+          id: task.id,
         }),
       ).rejects.toThrow(AccessDeniedError);
     });
 
     it("throws error when called by a different user in the same workspace", async () => {
-      const example = await createTestExample(
+      const task = await createTestTask(
         {
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User1Id,
         },
-        { name: "Test Example" },
+        { name: "Test Task", content: "Test Task Content" },
       );
 
       await expect(
-        exampleService.remove({
+        taskService.remove({
           teamId: team1Id,
           workspaceId: team1workspace1.id,
           userId: team1User2Id,
-          id: example.id,
+          id: task.id,
         }),
       ).rejects.toThrow(AccessDeniedError);
     });
