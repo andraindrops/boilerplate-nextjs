@@ -14,10 +14,12 @@ const mockRemove = vi.fn().mockResolvedValue({
   name: "Test Task",
   content: "Test Task Content",
 });
+const mockRun = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@/actions/domain/task", () => ({
   update: (...args: unknown[]) => mockUpdate(...args),
   remove: (...args: unknown[]) => mockRemove(...args),
+  run: (...args: unknown[]) => mockRun(...args),
 }));
 
 const mockPush = vi.fn();
@@ -50,6 +52,7 @@ describe("TaskForm", () => {
     );
     expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Run" })).toBeInTheDocument();
   });
 
   it("updates input value when user types", async () => {
@@ -127,6 +130,21 @@ describe("TaskForm", () => {
 
     await waitFor(() => {
       expect(mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  it("calls run action when Run button is clicked", async () => {
+    const user = userEvent.setup();
+    const task = defaultTask;
+
+    render(<TaskForm workspaceId="workspace-id" task={task} />);
+
+    await user.click(screen.getByRole("button", { name: "Run" }));
+
+    await waitFor(() => {
+      expect(mockRun).toHaveBeenCalledWith({
+        id: "task-id",
+      });
     });
   });
 });

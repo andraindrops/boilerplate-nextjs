@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AccessDeniedError } from "@/services/shared/scope";
 
@@ -10,6 +10,12 @@ import {
   createTestWorkspace,
   createTestWorkspaceUser,
 } from "@/tests/_helpers/fixtures/_index";
+
+const mockRunJavascript = vi.fn();
+
+vi.mock("@/services/shared/sandbox", () => ({
+  runJavascript: (...args: unknown[]) => mockRunJavascript(...args),
+}));
 
 describe("taskService", () => {
   const team1Id = "team1-id";
@@ -23,6 +29,7 @@ describe("taskService", () => {
   let team2workspace1: Awaited<ReturnType<typeof createTestWorkspace>>;
 
   beforeEach(async () => {
+    vi.clearAllMocks();
     await cleanupDatabase();
     team1workspace1 = await createTestWorkspace({ teamId: team1Id });
     team1workspace2 = await createTestWorkspace({ teamId: team1Id });
@@ -341,6 +348,54 @@ describe("taskService", () => {
           id: task.id,
         }),
       ).rejects.toThrow(AccessDeniedError);
+    });
+  });
+
+  describe("run", () => {
+    it("runs task content in sandbox", async () => {
+      mockRunJavascript.mockResolvedValueOnce({
+        exitCode: 0,
+        stdout: "ok",
+        stderr: "",
+      });
+      const task = await createTestTask(
+        {
+          teamId: team1Id,
+          workspaceId: team1workspace1.id,
+          userId: team1User1Id,
+        },
+        { name: "Test Task", content: "console.log('ok')" },
+      );
+
+      await taskService.run({
+        teamId: team1Id,
+        workspaceId: team1workspace1.id,
+        id: task.id,
+      });
+
+      expect(mockRunJavascript).toHaveBeenCalledWith({
+        code: "console.log('ok')",
+      });
+    });
+
+    it("throws error when task belongs to different workspace", async () => {
+      const task = await createTestTask(
+        {
+          teamId: team1Id,
+          workspaceId: team1workspace1.id,
+          userId: team1User1Id,
+        },
+        { name: "Test Task", content: "console.log('ok')" },
+      );
+
+      await expect(
+        taskService.run({
+          teamId: team1Id,
+          workspaceId: team1workspace2.id,
+          id: task.id,
+        }),
+      ).rejects.toThrow();
+      expect(mockRunJavascript).not.toHaveBeenCalled();
     });
   });
 });

@@ -87,3 +87,14 @@ export async function remove({ id }: { id: string }) {
 
   return result;
 }
+
+export async function run({ id }: { id: string }) {
+  const teamId = await authService.getTeamId();
+  const workspaceId = await authService.getWorkspaceId();
+
+  await taskService.run({
+    teamId,
+    workspaceId,
+    id,
+  });
+}

@@ -60,6 +60,15 @@ export default function Component({
     router.refresh();
   };
 
+  const handleRun = async () => {
+    try {
+      await taskAction.run({ id: task.id });
+      toast.success("Ran");
+    } catch {
+      toast.error("Run failed");
+    }
+  };
+
   return (
     <div className={cn(className)} {...props}>
       <Form {...form}>
@@ -116,6 +125,14 @@ export default function Component({
             data-testid="task-remove-button"
           >
             Remove
+          </Button>
+          <Button
+            type="button"
+            className="w-full"
+            onClick={handleRun}
+            data-testid="task-run-button"
+          >
+            Run
           </Button>
         </form>
       </Form>

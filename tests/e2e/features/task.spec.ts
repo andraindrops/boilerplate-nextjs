@@ -32,6 +32,7 @@ test.describe("task", () => {
 
     await expect(nameInput).toHaveValue("Updated Test Task");
     await expect(contentInput).toHaveValue("Updated Task Content");
+    await expect(page.getByTestId("task-run-button")).toBeVisible();
 
     const removeButton = page.getByTestId("task-remove-button");
     await removeButton.click();

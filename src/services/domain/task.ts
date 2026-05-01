@@ -4,6 +4,8 @@ import type * as taskSchema from "@/schemas/domain/task";
 
 import * as taskPolicy from "@/policies/domain/task";
 
+import * as sandboxService from "@/services/shared/sandbox";
+
 export async function findMany({
   teamId,
   workspaceId,
@@ -90,5 +92,25 @@ export async function remove({
 
   return await db.task.delete({
     where: { teamId, workspaceId, userId, id },
+  });
+}
+
+export async function run({
+  teamId,
+  workspaceId,
+  id,
+}: {
+  teamId: string;
+  workspaceId: string;
+  id: string;
+}): Promise<void> {
+  const task = await findById({
+    teamId,
+    workspaceId,
+    id,
+  });
+
+  await sandboxService.runJavascript({
+    code: task.content,
   });
 }
